@@ -42,3 +42,4 @@ const connectToDatabase = callback => {
 };
 
 exports.connectToDatabase = connectToDatabase;
+exports.instance = database;

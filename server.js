@@ -9,20 +9,17 @@ app.use(bodyParser.json());
 
 // Connecting to the database
 connectToDatabase(database => {
+	const Users = require("./models/user");
+
 	// USERS
 
 	app.get("/users", (req, res, next) => {
 		try {
-			if (!database.users || database.users.length === 0) {
-				const error = new Error("No users found");
-				error.status = 404;
-				throw error;
-			}
-
+			const payload = Users.readAll();
 			res.status(200).json({
 				error: false,
 				success: true,
-				payload: database.users
+				payload
 			});
 		} catch (err) {
 			res.status(err.status || 500).json({
@@ -35,13 +32,7 @@ connectToDatabase(database => {
 
 	app.get("/users/:id", (req, res, next) => {
 		try {
-			const user = database.users.find(u => u.id == req.params.id);
-
-			if (!user) {
-				const error = new Error("No user with this id was found.");
-				error.status = 404;
-				throw error;
-			}
+			const user = Users.read(req.params.id);
 
 			res.status(200).json({
 				error: false,
@@ -59,21 +50,7 @@ connectToDatabase(database => {
 
 	app.post("/users", (req, res, next) => {
 		try {
-			const name = req.body.name;
-
-			if (!name) {
-				const error = new Error("Wrong data sent");
-				error.status = 422;
-				throw error;
-			}
-
-			const user = {
-				name: name,
-				stories: [],
-				id: database.users.length
-			};
-
-			database.users.push(user);
+			const user = Users.create(req.body);
 
 			res.status(201).json({
 				error: false,
@@ -91,23 +68,12 @@ connectToDatabase(database => {
 
 	app.patch("/users/:id", (req, res, next) => {
 		try {
-			const userIndex = database.users.findIndex(
-				u => u.id == req.params.id
-			);
-
-			if (!userIndex || userIndex === -1) {
-				const error = new Error("No user with this id was found.");
-				error.status = 404;
-				throw error;
-			}
-
-			database.users[userIndex].name =
-				req.body.name || database.users[userIndex].name;
+			const user = Users.update(req.params.id, req.body);
 
 			res.status(200).json({
 				error: false,
 				success: true,
-				payload: database.users[userIndex]
+				payload: user
 			});
 		} catch (err) {
 			res.status(err.status || 500).json({
@@ -120,11 +86,7 @@ connectToDatabase(database => {
 
 	app.delete("/users/:id", (req, res, next) => {
 		try {
-			database.users = database.users.filter(u => u.id != req.params.id);
-
-			database.stories = database.stories.filter(
-				s => s.author !== req.params.id
-			);
+			Users.delete(req.params.id);
 
 			res.status(200).json({
 				error: false,
