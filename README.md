@@ -20,10 +20,12 @@ A Node / Express RESTful API boilerplate based on SOLID and DRY principles follo
 3. Open command line and run `npm install`.
 4. Run `npm start`.
 
-##MSC - Explained
+## MSC - Explained
+
 MSC or Model Service Controller is a data-friendly relative of MVC (Model, View, Controller). I like MSC approach more for JSON APIs.
 
-###Model
+### Model
+
 Model here is the default **Mongoose model**. I believe in _**Not** Re-inventing the Wheel_, and the default Mongoose model pretty much handles all the heavy lifting anyway.
 
 Alternately, a Base Model wrapper class can be created that extends the mongoose Model and can be used an abstraction layer for more general purpose models.
@@ -45,7 +47,8 @@ class BaseModel {
 }
 ```
 
-###Service
+### Service
+
 Service here is an abstraction layer over the Model and holds the actual **Business Logic** of the API.
 I have created a Base Service class that contains the basic REST methods so that default REST resources can be created easily. They can ofcourse be overriden as shown in `services/story.js`.
 
@@ -55,7 +58,8 @@ Adding a Service layer helps in:
 2. Improves re-usability of core logic for multiple modules for eg: Unit Testing, multi-resource API etc.
 3. Helps in de-coupling the App from API which allows using the same core for multiple APIs.
 
-###Controller
+### Controller
+
 Standard Controller that handles the Response, Header Validation etc. I have implemented a simple yet robust Base Controller class that includes the 5 major CRUD operations (Read and Read All too).
 
 The idea here is to quickly develop basic and less complex REST resources while still having the freedom and flexibility to add more functionality as required.
