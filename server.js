@@ -10,113 +10,33 @@ app.use(bodyParser.json());
 // Connecting to the database
 connectToDatabase(database => {
 	const UserController = require("./controllers/user");
-	const Stories = require("./models/story");
+	const StoryController = require("./controllers/story");
 
 	// USERS
 
-	app.get("/users", UserController.getAll);
+	app.get("/users", UserController.getAll.bind(UserController));
 
-	app.get("/users/:id", UserController.getOne);
+	app.get("/users/:id", UserController.getOne.bind(UserController));
 
-	app.post("/users", UserController.create);
+	app.post("/users", UserController.create.bind(UserController));
 
-	app.patch("/users/:id", UserController.update);
+	app.patch("/users/:id", UserController.update.bind(UserController));
 
-	app.delete("/users/:id", UserController.delete);
+	app.delete("/users/:id", UserController.delete.bind(UserController));
 
 	// STORIES
 
-	app.get("/stories", (req, res, next) => {
-		try {
-			const stories = Stories.readAll();
+	app.get("/stories", StoryController.getAll.bind(StoryController));
 
-			res.status(200).json({
-				error: false,
-				success: true,
-				payload: stories
-			});
-		} catch (err) {
-			res.status(err.status || 500).json({
-				error: true,
-				success: false,
-				payload: err.message
-			});
-		}
-	});
+	app.get("/stories/:id", StoryController.getOne.bind(StoryController));
 
-	app.get("/stories/:id", (req, res, next) => {
-		try {
-			const story = Stories.read(req.params.id);
+	app.post("/stories", StoryController.create.bind(StoryController));
 
-			res.status(200).json({
-				error: false,
-				success: true,
-				payload: story
-			});
-		} catch (err) {
-			res.status(err.status || 500).json({
-				error: true,
-				success: false,
-				payload: err.message
-			});
-		}
-	});
+	app.patch("/stories/:id", StoryController.update.bind(StoryController));
 
-	app.post("/stories", (req, res, next) => {
-		try {
-			const story = Stories.create(req.body);
+	app.delete("/stories/:id", StoryController.delete.bind(StoryController));
 
-			res.status(201).json({
-				error: false,
-				success: true,
-				payload: story
-			});
-		} catch (err) {
-			res.status(err.status || 500).json({
-				error: true,
-				success: false,
-				payload: err.message
-			});
-		}
-	});
-
-	app.patch("/stories/:id", (req, res, next) => {
-		try {
-			const story = Stories.update(req.params.id, req.body);
-
-			res.status(200).json({
-				error: false,
-				success: true,
-				payload: story
-			});
-		} catch (err) {
-			res.status(err.status || 500).json({
-				error: true,
-				success: false,
-				payload: err.message
-			});
-		}
-	});
-
-	app.delete("/stories/:id", (req, res, next) => {
-		try {
-			Stories.delete(req.params.id, req.body);
-
-			res.status(200).json({
-				error: false,
-				success: true,
-				payload: null
-			});
-		} catch (err) {
-			res.status(err.status || 500).json({
-				error: true,
-				success: false,
-				payload: err.message
-			});
-		}
-	});
-
-	console.log(database);
+	// Starting the server
 
 	if (database) {
 		app.listen(3000);

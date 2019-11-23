@@ -20,3 +20,5 @@ After building the one-page api now it is time to refactor it to make it scalabl
 -   ~~Create a user "service" that will separate the "business logic" from "database handling". For now, just console the data and service name.~~
 
 -   ~~Create a user "controller" that will separate the concern of handling the request and response properly from "processing" the data and "implementing" business logic.~~
+
+-   ~~Create a "base" service and controller class that can be extended and have "basic" REST features. Implement "stories" service and controller by extending from base.~~
