@@ -1,13 +1,16 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const { connectToDatabase } = require("./database");
+const errorHandler = require("./middlewares/error-handler");
 
 const app = express();
 
+// Configuring the app
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Connecting to the database
+const { connectToDatabase } = require("./database");
+
 connectToDatabase(database => {
 	const UserController = require("./controllers/user");
 	const StoryController = require("./controllers/story");
@@ -36,8 +39,10 @@ connectToDatabase(database => {
 
 	app.delete("/stories/:id", StoryController.delete.bind(StoryController));
 
-	// Starting the server
+	// Error handler
+	app.use(errorHandler);
 
+	// Starting the server
 	if (database) {
 		app.listen(3000);
 		console.log("Server started.");
