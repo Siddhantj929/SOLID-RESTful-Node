@@ -9,99 +9,20 @@ app.use(bodyParser.json());
 
 // Connecting to the database
 connectToDatabase(database => {
-	const Users = require("./models/user");
+	const UserController = require("./controllers/user");
 	const Stories = require("./models/story");
 
 	// USERS
 
-	app.get("/users", (req, res, next) => {
-		try {
-			const payload = Users.readAll();
-			res.status(200).json({
-				error: false,
-				success: true,
-				payload
-			});
-		} catch (err) {
-			res.status(err.status || 500).json({
-				error: true,
-				success: false,
-				payload: err.message
-			});
-		}
-	});
+	app.get("/users", UserController.getAll);
 
-	app.get("/users/:id", (req, res, next) => {
-		try {
-			const user = Users.read(req.params.id);
+	app.get("/users/:id", UserController.getOne);
 
-			res.status(200).json({
-				error: false,
-				success: true,
-				payload: user
-			});
-		} catch (err) {
-			res.status(err.status || 500).json({
-				error: true,
-				success: false,
-				payload: err.message
-			});
-		}
-	});
+	app.post("/users", UserController.create);
 
-	app.post("/users", (req, res, next) => {
-		try {
-			const user = Users.create(req.body);
+	app.patch("/users/:id", UserController.update);
 
-			res.status(201).json({
-				error: false,
-				success: true,
-				payload: user
-			});
-		} catch (err) {
-			res.status(err.status || 500).json({
-				error: true,
-				success: false,
-				payload: err.message
-			});
-		}
-	});
-
-	app.patch("/users/:id", (req, res, next) => {
-		try {
-			const user = Users.update(req.params.id, req.body);
-
-			res.status(200).json({
-				error: false,
-				success: true,
-				payload: user
-			});
-		} catch (err) {
-			res.status(err.status || 500).json({
-				error: true,
-				success: false,
-				payload: err.message
-			});
-		}
-	});
-
-	app.delete("/users/:id", (req, res, next) => {
-		try {
-			Users.delete(req.params.id);
-
-			res.status(200).json({
-				error: false,
-				success: true,
-				payload: null
-			});
-		} catch (err) {
-			res.status(err.status || 500).json({
-				error: true,
-				success: false,
-				payload: err.message
-			});
-		}
-	});
+	app.delete("/users/:id", UserController.delete);
 
 	// STORIES
 
