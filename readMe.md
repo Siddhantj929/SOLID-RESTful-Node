@@ -23,5 +23,9 @@ After building the one-page api now it is time to refactor it to make it scalabl
 
 -   ~~Create a "base" service and controller class that can be extended and have "basic" REST features. Implement "stories" service and controller by extending from base.~~
 
--   ~~Create a response model~~
--   ~~Create a "error handler" middleware~~
+-   ~~Create a response model.~~
+-   ~~Create a "error handler" middleware.~~
+-   ~~Configure to run with "mongoose".~~
+-   ~~Configure the security and logging middlewares.~~
+-   ~~Improve performance by using compression middlewares.~~
+-   ~~Imporve performance by using Parallel Processing using Clusters.~~

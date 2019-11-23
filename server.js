@@ -1,52 +1,33 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const errorHandler = require("./middlewares/error-handler");
+var cluster = require("cluster");
+var os = require("os");
 
-const app = express();
+const CPUs = os.cpus();
 
-// Configuring the app
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+// Adding parallel processing support by using cluster of multiple cores
+if (cluster.isMaster) {
+	CPUs.forEach(() => {
+		cluster.fork();
+	});
 
-// Connecting to the database
-const { connectToDatabase } = require("./database");
+	cluster.on("listening", worker => {
+		console.log(`Cluster ${worker.process.pid} connected.`);
+	});
 
-connectToDatabase(database => {
-	const UserController = require("./controllers/user");
-	const StoryController = require("./controllers/story");
+	cluster.on("disconnect", worker => {
+		console.log(`Cluster ${worker.process.pid} disconnected.`);
+	});
 
-	// USERS
+	cluster.on("exit", worker => {
+		console.log(`Cluster ${worker.process.pid} is dead.`);
 
-	app.get("/users", UserController.getAll.bind(UserController));
+		// Ensuring a new cluster will start if an old one dies
+		cluster.fork();
+	});
+} else {
+	const { connectToDatabase } = require("./database");
 
-	app.get("/users/:id", UserController.getOne.bind(UserController));
-
-	app.post("/users", UserController.create.bind(UserController));
-
-	app.patch("/users/:id", UserController.update.bind(UserController));
-
-	app.delete("/users/:id", UserController.delete.bind(UserController));
-
-	// STORIES
-
-	app.get("/stories", StoryController.getAll.bind(StoryController));
-
-	app.get("/stories/:id", StoryController.getOne.bind(StoryController));
-
-	app.post("/stories", StoryController.create.bind(StoryController));
-
-	app.patch("/stories/:id", StoryController.update.bind(StoryController));
-
-	app.delete("/stories/:id", StoryController.delete.bind(StoryController));
-
-	// Error handler
-	app.use(errorHandler);
-
-	// Starting the server
-	if (database) {
-		app.listen(3000);
-		console.log("Server started.");
-	} else {
-		console.log("Error while connecting to databse.\n\n=>", err);
-	}
-});
+	// Connecting to the database
+	connectToDatabase()
+		.then(() => require("./app").start())
+		.catch(err => console.log("Error while starting the app.\n\n=>", err));
+}

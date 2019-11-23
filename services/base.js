@@ -3,29 +3,24 @@ class BaseService {
 		this.model = model;
 	}
 
-	create(data) {
-		console.log("<Service> : Creating...");
-		return this.model.create(data);
+	async create(data) {
+		return await new this.model(data).save();
 	}
 
-	fetchOne(id) {
-		console.log(`<Service> : Finding with id ${id}...`);
-		return this.model.read(id);
+	async fetchOne(id) {
+		return await this.model.findById(id);
 	}
 
-	fetchAll() {
-		console.log(`<Service> : Fetching all...`);
-		return this.model.readAll();
+	async fetchAll() {
+		return await this.model.find();
 	}
 
-	update(id, data) {
-		console.log(`<Service> : Updating with id ${id}...`);
-		return this.model.update(id, data);
+	async update(id, data) {
+		return await this.model.findByIdAndUpdate(id, data);
 	}
 
-	delete(id, data) {
-		console.log(`<Service> : Deleting with id ${id}...`);
-		return this.model.delete(id);
+	async delete(id, data) {
+		return await this.model.findByIdAndRemove(id);
 	}
 }
 
