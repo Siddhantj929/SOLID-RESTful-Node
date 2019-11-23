@@ -10,6 +10,7 @@ app.use(bodyParser.json());
 // Connecting to the database
 connectToDatabase(database => {
 	const Users = require("./models/user");
+	const Stories = require("./models/story");
 
 	// USERS
 
@@ -106,16 +107,12 @@ connectToDatabase(database => {
 
 	app.get("/stories", (req, res, next) => {
 		try {
-			if (!database.stories || database.stories.length === 0) {
-				const error = new Error("No stories found");
-				error.status = 404;
-				throw error;
-			}
+			const stories = Stories.readAll();
 
 			res.status(200).json({
 				error: false,
 				success: true,
-				payload: database.stories
+				payload: stories
 			});
 		} catch (err) {
 			res.status(err.status || 500).json({
@@ -128,13 +125,7 @@ connectToDatabase(database => {
 
 	app.get("/stories/:id", (req, res, next) => {
 		try {
-			const story = database.stories.find(s => s.id == req.params.id);
-
-			if (!story) {
-				const error = new Error("No story with this id was found.");
-				error.status = 404;
-				throw error;
-			}
+			const story = Stories.read(req.params.id);
 
 			res.status(200).json({
 				error: false,
@@ -152,22 +143,7 @@ connectToDatabase(database => {
 
 	app.post("/stories", (req, res, next) => {
 		try {
-			const text = req.body.text;
-			const author = req.body.author;
-
-			if (!text || !author) {
-				const error = new Error("Wrong data sent");
-				error.status = 422;
-				throw error;
-			}
-
-			const story = {
-				text: text,
-				author: author,
-				id: database.stories.length
-			};
-
-			database.stories.push(story);
+			const story = Stories.create(req.body);
 
 			res.status(201).json({
 				error: false,
@@ -185,41 +161,12 @@ connectToDatabase(database => {
 
 	app.patch("/stories/:id", (req, res, next) => {
 		try {
-			const storyIndex = database.stories.findIndex(
-				s => s.id == req.params.id
-			);
-
-			if (!storyIndex || storyIndex === -1) {
-				const error = new Error("No story with this id was found.");
-				error.status = 404;
-				throw error;
-			}
-
-			const authorId = parseInt(req.body.author);
-
-			const authorIndex = database.users.findIndex(
-				u => u.id === authorId
-			);
-
-			if (
-				!authorIndex ||
-				authorIndex === -1 ||
-				database.stories[storyIndex].author !== authorId
-			) {
-				const error = new Error(
-					"You are not authorized to edit this story."
-				);
-				error.status = 401;
-				throw error;
-			}
-
-			database.stories[storyIndex].text =
-				req.body.text || database.stories[storyIndex].text;
+			const story = Stories.update(req.params.id, req.body);
 
 			res.status(200).json({
 				error: false,
 				success: true,
-				payload: database.stories[storyIndex]
+				payload: story
 			});
 		} catch (err) {
 			res.status(err.status || 500).json({
@@ -232,35 +179,7 @@ connectToDatabase(database => {
 
 	app.delete("/stories/:id", (req, res, next) => {
 		try {
-			const storyIndex = database.stories.findIndex(
-				s => s.id == req.params.id
-			);
-
-			const authorId = parseInt(req.body.author);
-
-			const authorIndex = database.users.findIndex(
-				u => u.id === authorId
-			);
-
-			if (
-				!authorIndex ||
-				authorIndex === -1 ||
-				database.stories[storyIndex].author !== authorId
-			) {
-				const error = new Error(
-					"You are not authorized to delete this story."
-				);
-				error.status = 401;
-				throw error;
-			}
-
-			database.stories = database.stories.filter(
-				s => s.id != req.params.id
-			);
-
-			database.users[authorIndex].stories = database.users[
-				authorIndex
-			].stories.filter(s => s != req.params.id);
+			Stories.delete(req.params.id, req.body);
 
 			res.status(200).json({
 				error: false,
